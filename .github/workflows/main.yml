@@ -1,0 +1,24 @@
+name: Build SMAPI Mod
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Build Mod
+        run: dotnet build OmniTools/OmniTools.csproj -c Release
+
+      - name: Upload Mod Zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: Fixed-OmniTools-Mod
+          path: 'OmniTools/bin/Release/**'
