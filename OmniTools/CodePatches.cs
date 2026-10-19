@@ -259,15 +259,8 @@ namespace OmniTools
                 Tool t = SwitchForTerrainFeature(Game1.player.CurrentTool, __instance);
                 if (t is not null)
                 {
-                    foreach (var e in Game1.player.CurrentTool.enchantments)
-                    {
-                        e.OnUnequip(Game1.player);
-                    }
+                    UpdateEnchantments(Game1.player, Game1.player.CurrentTool, t);
                     Game1.player.CurrentTool = t;
-                    foreach (var e in t.enchantments)
-                    {
-                        e.ApplyTo(t, Game1.player);
-                    }
                 }
             }
         }

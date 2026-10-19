@@ -504,6 +504,7 @@ namespace OmniTools
             }
             foreach (var e in newTool.enchantments)
             {
+                e.ApplyTo(newTool, player);
                 e.OnEquip(player);
             }
         }
@@ -514,13 +515,32 @@ namespace OmniTools
             {
                 try
                 {
-                 
                     var type = typeof(Game1).Assembly.GetType(toolInfo.enchantments[i]);
+                    if (type is null)
+                    {
+                        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                        {
+                            type = asm.GetType(toolInfo.enchantments[i]);
+                            if (type is not null)
+                                break;
+                        }
+                    }
+                    if (type is null)
+                    {
+                        SMonitor.Log($"Could not find enchantment type: {toolInfo.enchantments[i]}", StardewModdingAPI.LogLevel.Warn);
+                        continue;
+                    }
                     BaseEnchantment enchantment = (BaseEnchantment)Activator.CreateInstance(type);
                     enchantment.Level = toolInfo.enchantLevels[i];
-                    AccessTools.Method(t.GetType(), "AddEnchantment").Invoke(t, new object[] { enchantment });
+                    if (!t.enchantments.Any(e => e.GetType() == type))
+                    {
+                        t.enchantments.Add(enchantment);
+                    }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    SMonitor.Log($"Error restoring enchantment {toolInfo.enchantments[i]}: {ex}", StardewModdingAPI.LogLevel.Error);
+                }
             }
             foreach (var oi in toolInfo.attachments)
             {
